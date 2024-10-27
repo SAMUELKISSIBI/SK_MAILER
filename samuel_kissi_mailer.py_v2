@@ -1,0 +1,67 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import sys  # Importation de sys pour utiliser sys.stdin
+
+def samuel_kissi_mailer(smtp_server, smtp_port, username, password, from_email, display_name, to_email, subject, html_body):
+    # Création de l'email avec des en-têtes falsifiés
+    msg = MIMEMultipart()
+    msg['From'] = f"{display_name} <{from_email}>"
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    
+    # Attachement du message en HTML
+    msg.attach(MIMEText(html_body, 'html'))
+
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Démarre la connexion sécurisée
+            server.login(username, password)  # Authentification
+            server.sendmail(from_email, to_email, msg.as_string())  # Envoi de l'email
+        print("Email envoyé avec succès avec en-têtes falsifiés!")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de l'email: {e}")
+
+# Paramètres de connexion
+smtp_server = 'smtp.gmail.com'  # Serveur SMTP de Gmail
+smtp_port = 587  # Port pour TLS
+username = 'entrez votre mail a cette place ou votre id smtp'  # Votre adresse Gmail
+password = 'entrez votre mot de passe smtp '  # Votre mot de passe d'application
+
+# Collecte des informations de l'utilisateur
+print("\n ENTREZ LES INFORMATIONS POUR CHANGER L'ENTETE DE VOTRE MAIL:")
+display_name = input("\n ENTREZ LE NOM POUR VOTRE MAIL A LA RECEPTION: ")  # Par exemple, "PAYPAL"
+from_email = input("\n ENTREZ UN MAIL NORMAL MEME S'IL N'EXISTE PAS(falsifiée): ")  # Adresse email que vous souhaitez simuler
+to_email = input("\n ENTREZ LE MAIL DU DESTINATAIRE: ")  # Adresse email du destinataire
+subject = input("\n ENTREZ L'OBJET OU LE TITRE DE VOTRE MAIL: ")  # Sujet de l'email
+
+# Choix du mode d'entrée du message
+print("\nCOMMENT VOULEZ-VOUS ECRIRE LE MESSAGE DU MAIL? CHOISSISSEZ UN FORMAT\n")
+print("1. Écrire le message moi-même avec le clavier")
+print("2. Coller un message HTML")
+print("3. Attacher un fichier HTML")
+
+choix = input("\n Veuillez entrer le numéro de votre choix (1, 2 ou 3): \n \n==> ")
+
+html_body = ""
+
+if choix == '1':
+    html_body = input("Écrivez votre message personnel avec les touches de votre clavier: ")  # Saisie manuelle du message
+elif choix == '2':
+    print("Collez votre message HTML complet ci-dessous  avec le format de base (appuyez sur Ctrl+D pour terminer):")
+    html_body = sys.stdin.read()  # Lire tout le texte collé jusqu'à Ctrl+D
+elif choix == '3':
+    # Demander le chemin du fichier HTML
+    file_path = input("Entrez le chemin complet du fichier HTML à attacher: ")
+    try:
+        with open(file_path, 'r') as file:
+            html_body = file.read()  # Lire le contenu du fichier HTML
+    except FileNotFoundError:
+        print("Fichier non trouvé. Veuillez vérifier le chemin.")
+        exit(1)  # Sortir du programme si le fichier n'est pas trouvé
+else:
+    print("Choix invalide. Veuillez redémarrer le programme et choisir une option valide.")
+    exit(1)  # Sortir du programme en cas de choix invalide
+
+# Envoi de l'email avec des en-têtes falsifiés
+samuel_kissi_mailer(smtp_server, smtp_port, username, password, from_email, display_name, to_email, subject, html_body)
